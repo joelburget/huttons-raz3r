@@ -21,6 +21,6 @@ library
   exposed-modules: Hutton
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.12 && <4.13, sbv
+  build-depends:       base >=4.12 && <4.13, containers, mtl, sbv
   hs-source-dirs:      src
   default-language:    Haskell2010
