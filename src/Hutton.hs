@@ -29,10 +29,10 @@ data Fun a b where
 data Expr ty where
   BinaryOp :: BinaryOp a -> Expr a -> Expr a -> Expr a
   UnaryOp  :: UnaryOp  a           -> Expr a -> Expr a
-  Ite :: Expr Bool -> Expr a -> Expr a -> Expr a
-  App :: Fun a b -> Expr a             -> Expr b
-  Lit :: SymVal a => a                 -> Expr a
-  Var :: String                        -> Expr a
+  Ite      :: Expr Bool -> Expr a  -> Expr a -> Expr a
+  App      :: Fun a b -> Expr a              -> Expr b
+  Lit      :: SymVal a => a                  -> Expr a
+  Var      :: String                         -> Expr a
 
 newtype Eval a = Eval { runEval :: ReaderT (Map String SBVI.SVal) (Either String) a }
   deriving (Functor, Applicative, Monad, MonadReader (Map String SBVI.SVal),
