@@ -23,10 +23,14 @@ data UnaryOp a where
   Neg :: UnaryOp Integer
   Not :: UnaryOp Bool
 
+data Fun a b where
+  Fun :: SymVal a => String -> Expr b -> Fun a b
+
 data Expr ty where
   BinaryOp :: BinaryOp a -> Expr a -> Expr a -> Expr a
   UnaryOp  :: UnaryOp  a           -> Expr a -> Expr a
   Ite :: Expr Bool -> Expr a -> Expr a -> Expr a
+  App :: Fun a b -> Expr a             -> Expr b
   Lit :: SymVal a => a                 -> Expr a
   Var :: String                        -> Expr a
 
@@ -61,6 +65,9 @@ eval = \case
   Ite a b c -> do
     a' <- eval a
     ite a' (eval b) (eval c)
+  App (Fun varName body) arg -> do
+    SBVI.SBV arg' <- eval arg
+    local (Map.insert varName arg') (eval body)
   Lit i -> pure $ literal i
   Var v -> do
     env <- ask
