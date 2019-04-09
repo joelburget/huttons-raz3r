@@ -10,8 +10,22 @@ import qualified Data.Map as Map
 import Data.SBV
 import qualified Data.SBV.Internals as SBVI
 
+data BinaryOp a where
+  Add :: BinaryOp Integer
+  Sub :: BinaryOp Integer
+  Mul :: BinaryOp Integer
+  Div :: BinaryOp Integer
+
+  And :: BinaryOp Bool
+  Or  :: BinaryOp Bool
+
+data UnaryOp a where
+  Neg :: UnaryOp Integer
+  Not :: UnaryOp Bool
+
 data Expr ty where
-  Add :: Expr Integer -> Expr Integer  -> Expr Integer
+  BinaryOp :: BinaryOp a -> Expr a -> Expr a -> Expr a
+  UnaryOp  :: UnaryOp  a           -> Expr a -> Expr a
   Ite :: Expr Bool -> Expr a -> Expr a -> Expr a
   Lit :: SymVal a => a                 -> Expr a
   Var :: String                        -> Expr a
@@ -30,7 +44,20 @@ instance Mergeable a => Mergeable (Eval a) where
 
 eval :: SymVal a => Expr a -> Eval (SBV a)
 eval = \case
-  Add x y -> (+) <$> eval x <*> eval y
+  BinaryOp op x y -> do
+    let op' = case op of
+          Add -> (+)
+          Sub -> (-)
+          Mul -> (*)
+          Div -> sDiv
+          And -> (.&&)
+          Or  -> (.||)
+    op' <$> eval x <*> eval y
+  UnaryOp op x -> do
+    let op' = case op of
+          Neg -> negate
+          Not -> sNot
+    op' <$> eval x
   Ite a b c -> do
     a' <- eval a
     ite a' (eval b) (eval c)
